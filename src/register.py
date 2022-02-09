@@ -22,4 +22,4 @@ def get_contents(register):
 
 
 def set_contents(register, value):
-    register("set")(value)
+    return register("set")(value)
