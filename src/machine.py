@@ -32,12 +32,27 @@ def make_new_machine():
             return execute()
         elif message == "install-instruction-sequence":
 
-            def install(seq):
+            def install_instructions(seq):
                 nonlocal instuctions
                 instuctions = seq
 
-            return install
+            return install_instructions
 
+        elif message == "allocate-register":
+            return allocate_register
+        elif message == "get-register":
+            return lookup_register
+        elif message == "install-operations":
+
+            def install_operations(new_ops):
+                nonlocal ops
+                ops = ops + new_ops
+
+            return install_operations
+        elif message == "stack":
+            return stack
+        elif message == "operations":
+            return ops
         else:
             raise ValueError(f"Unknown request {message}")
 
