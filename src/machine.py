@@ -1,5 +1,6 @@
 from src.register import make_register, get_contents, set_contents
 from src.stack import make_stack
+from src.assembler import instruction_execution_proc
 
 
 def make_new_machine():
