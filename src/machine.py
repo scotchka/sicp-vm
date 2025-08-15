@@ -61,3 +61,16 @@ def make_new_machine():
 
 def start(machine):
     return machine("start")
+
+
+def get_register_contents(machine, register_name):
+    return get_contents(get_register(machine, register_name))
+
+
+def set_register_contents(machine, register_name, value):
+    set_contents(get_register(machine, register_name), value)
+    return "done"
+
+
+def get_register(machine, register_name):
+    return machine("get-register")(register_name)
