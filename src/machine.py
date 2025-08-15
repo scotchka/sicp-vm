@@ -1,6 +1,5 @@
 from src.register import make_register, get_contents, set_contents
 from src.stack import make_stack
-from src.assembler import instruction_execution_proc
 
 
 def make_new_machine():
@@ -24,7 +23,8 @@ def make_new_machine():
         insts = get_contents(pc)
         if insts == []:
             return "done"
-        instruction_execution_proc(insts[0])
+        proc = instruction_execution_proc(insts[0])
+        proc()
         return execute()
 
     def dispatch(message):
@@ -75,3 +75,8 @@ def set_register_contents(machine, register_name, value):
 
 def get_register(machine, register_name):
     return machine("get-register")(register_name)
+
+
+def instruction_execution_proc(inst):
+    text, proc = inst
+    return proc

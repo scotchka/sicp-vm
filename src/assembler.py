@@ -42,16 +42,13 @@ def update_insts(insts, labels, machine):
 
 
 def make_instruction(text):
-    return [text]
+    return [text, None]
 
 
 def instruction_text(inst):
-    return inst[0]
-
-
-def instruction_execution_proc(inst):
-    return inst[1:]
+    text, proc = inst
+    return text
 
 
 def set_instruction_execution_proc(inst, proc):
-    inst[1:] = proc
+    inst[1] = proc
