@@ -6,7 +6,7 @@ def make_new_machine():
     pc = make_register("pc")
     flag = make_register("flag")
     stack = make_stack()
-    instuctions = []
+    instructions = []
     ops = [("initialize-stack", lambda: stack("initialize"))]
     registers = {"pc": pc, "flag": flag}
 
@@ -28,13 +28,13 @@ def make_new_machine():
 
     def dispatch(message):
         if message == "start":
-            set_contents(pc, instuctions)
+            set_contents(pc, instructions)
             return execute()
         elif message == "install-instruction-sequence":
 
             def install_instructions(seq):
-                nonlocal instuctions
-                instuctions = seq
+                nonlocal instructions
+                instructions = seq
 
             return install_instructions
 
