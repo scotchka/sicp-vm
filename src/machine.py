@@ -5,7 +5,7 @@ from src.stack import Stack
 def make_machine(register_names, ops, controller_text):
     from src.assembler import assemble
 
-    machine = make_new_machine()
+    machine = Machine()
     for register_name in register_names:
         machine("allocate-register")(register_name)
     machine("install-operations")(ops)
@@ -13,66 +13,41 @@ def make_machine(register_names, ops, controller_text):
     return machine
 
 
-def make_new_machine():
-    pc = Register()
-    flag = Register()
-    stack = Stack()
-    instructions = []
-    ops = [("initialize-stack", lambda: stack.__init__())]
-    registers = {"pc": pc, "flag": flag}
+class Machine:
+    def __init__(self):
+        self.pc = Register()
+        self.flag = Register()
+        self.stack = Stack()
+        self.instructions = []
+        self.ops = {"initialize-stack": lambda: self.stack.__init__()}
+        self.registers = {"pc": self.pc, "flag": self.flag}
 
-    def allocate_register(name):
-        if name in registers:
+    def allocate_register(self, name):
+        if name in self.registers:
             raise ValueError(f"Multiply defined register: {name}")
-        registers[name] = Register()
+        self.registers[name] = Register()
         return "register allocated"
 
-    def lookup_register(name):
-        return registers[name]
+    def lookup_register(self, name):
+        return self.registers[name]
 
-    def execute():
-        insts = pc.get_contents()
+    def execute(self):
+        insts = self.pc.get_contents()
         if insts == []:
             return "done"
         proc = instruction_execution_proc(insts[0])
         proc()
-        return execute()
+        return self.execute()
 
-    def dispatch(message):
-        if message == "start":
-            pc.set_contents(instructions)
-            return execute()
-        elif message == "install-instruction-sequence":
+    def start(self):
+        self.pc.set_contents(self.instructions)
+        return self.execute()
 
-            def install_instructions(seq):
-                nonlocal instructions
-                instructions = seq
+    def install_instructions(self, instructions):
+        self.instructions = instructions
 
-            return install_instructions
-
-        elif message == "allocate-register":
-            return allocate_register
-        elif message == "get-register":
-            return lookup_register
-        elif message == "install-operations":
-
-            def install_operations(new_ops):
-                nonlocal ops
-                ops = ops + new_ops
-
-            return install_operations
-        elif message == "stack":
-            return stack
-        elif message == "operations":
-            return ops
-        else:
-            raise ValueError(f"Unknown request {message}")
-
-    return dispatch
-
-
-def start(machine):
-    return machine("start")
+    def install_operations(self, ops):
+        self.ops.update(ops)
 
 
 def get_register_contents(machine, register_name):

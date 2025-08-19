@@ -1,34 +1,28 @@
 import pytest
-from src.machine import make_new_machine, start
+from src.machine import Machine
 
 
 def test_start():
-    machine = make_new_machine()
-    machine("install-instruction-sequence")([])
+    machine = Machine()
+    machine.install_instructions([])
 
-    assert start(machine) == "done"
+    assert machine.start() == "done"
 
 
 def test_allocate_register():
-    machine = make_new_machine()
-    machine("allocate-register")("abc")
-    register = machine("get-register")("abc")
+    machine = Machine()
+    machine.allocate_register("abc")
+    register = machine.registers["abc"]
     assert register.get_contents() is None
 
 
 def test_allocate_register_exception():
-    machine = make_new_machine()
+    machine = Machine()
     with pytest.raises(ValueError, match="Multiply defined register: pc"):
-        machine("allocate-register")("pc")
+        machine.allocate_register("pc")
 
 
 def test_install_operations():
-    machine = make_new_machine()
-    machine("install-operations")([("op",)])
-    assert machine("operations")[-1] == ("op",)
-
-
-def test_machine_exception():
-    machine = make_new_machine()
-    with pytest.raises(ValueError, match="Unknown request nope"):
-        machine("nope")
+    machine = Machine()
+    machine.install_operations({"a": 1})
+    assert machine.ops["a"] == 1
