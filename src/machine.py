@@ -1,5 +1,5 @@
 from src.register import make_register, get_contents, set_contents
-from src.stack import make_stack
+from src.stack import Stack
 
 
 def make_machine(register_names, ops, controller_text):
@@ -16,9 +16,9 @@ def make_machine(register_names, ops, controller_text):
 def make_new_machine():
     pc = make_register("pc")
     flag = make_register("flag")
-    stack = make_stack()
+    stack = Stack()
     instructions = []
-    ops = [("initialize-stack", lambda: stack("initialize"))]
+    ops = [("initialize-stack", lambda: stack.__init__())]
     registers = {"pc": pc, "flag": flag}
 
     def allocate_register(name):
