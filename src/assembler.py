@@ -1,7 +1,3 @@
-from src.machine import get_register
-from src.register import set_contents, get_contents
-
-
 def assemble(controller_text, machine):
     insts, labels = extract_labels(controller_text)
     update_insts(insts, labels, machine)
@@ -20,10 +16,10 @@ def extract_labels(text):
 
 
 def update_insts(insts, labels, machine):
-    pc = get_register(machine, "pc")
-    flag = get_register(machine, "flag")
-    stack = machine("stack")
-    ops = machine("operations")
+    pc = machine.registers["pc"]
+    flag = machine.registers["flag"]
+    stack = machine.stack
+    ops = machine.ops
 
     def apply(inst):
         set_instruction_execution_proc(
@@ -58,7 +54,7 @@ def make_execution_procedure(inst, labels, machine, pc, flag, stack, ops):
 
 
 def make_assign(inst, machine, labels, operations, pc):
-    target = get_register(machine, assign_reg_name(inst))
+    target = machine.registers[assign_reg_name(inst)]
     value_exp = assign_value_exp(inst)
     if value_exp[0][0] == "op":
         value_proc = make_operation_exp(value_exp, machine, labels, operations)
@@ -66,7 +62,7 @@ def make_assign(inst, machine, labels, operations, pc):
         value_proc = make_primitive_exp(value_exp[0], machine, labels)
 
     def proc():
-        set_contents(target, value_proc())
+        target.set_contents(value_proc())
         advance_pc(pc)
 
     return proc
@@ -88,8 +84,8 @@ def make_primitive_exp(exp, machine, labels):
         idx = labels[value]
         return lambda: idx
     elif keyword == "reg":  # ["reg", "n"]
-        r = get_register(machine, value)
-        return lambda: get_contents(r)
+        r = machine.registers[value]
+        return lambda: r.get_contents()
     else:
         raise Exception(f"unknown expression type -- ASSEMBLE {exp}")
 
@@ -103,4 +99,4 @@ def make_operation_exp(exp, machine, labels, operations):
 
 
 def advance_pc(pc):
-    set_contents(pc, get_contents(pc) + 1)
+    pc.set_contents(pc.get_contents() + 1)

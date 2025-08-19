@@ -1,9 +1,9 @@
 from src.register import Register
 from src.stack import Stack
+from src.assembler import assemble
 
 
 def make_machine(register_names, ops, controller_text):
-    from src.assembler import assemble
 
     machine = Machine()
     for register_name in register_names:
