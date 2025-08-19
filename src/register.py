@@ -1,25 +1,9 @@
-def make_register(name):
-    contents = None
+class Register:
+    def __init__(self):
+        self._contents = None
 
-    def dispatch(message):
-        if message == "get":
-            return contents
-        elif message == "set":
+    def get_contents(self):
+        return self._contents
 
-            def set_value(value):
-                nonlocal contents
-                contents = value
-
-            return set_value
-        else:
-            raise ValueError(f"Unknown request {message}")
-
-    return dispatch
-
-
-def get_contents(register):
-    return register("get")
-
-
-def set_contents(register, value):
-    return register("set")(value)
+    def set_contents(self, contents):
+        self._contents = contents

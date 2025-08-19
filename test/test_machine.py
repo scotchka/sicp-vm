@@ -13,7 +13,7 @@ def test_allocate_register():
     machine = make_new_machine()
     machine("allocate-register")("abc")
     register = machine("get-register")("abc")
-    assert register("get") is None
+    assert register.get_contents() is None
 
 
 def test_allocate_register_exception():

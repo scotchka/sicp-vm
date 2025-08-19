@@ -1,4 +1,4 @@
-from src.register import make_register, get_contents, set_contents
+from src.register import Register
 from src.stack import Stack
 
 
@@ -14,8 +14,8 @@ def make_machine(register_names, ops, controller_text):
 
 
 def make_new_machine():
-    pc = make_register("pc")
-    flag = make_register("flag")
+    pc = Register()
+    flag = Register()
     stack = Stack()
     instructions = []
     ops = [("initialize-stack", lambda: stack.__init__())]
@@ -24,14 +24,14 @@ def make_new_machine():
     def allocate_register(name):
         if name in registers:
             raise ValueError(f"Multiply defined register: {name}")
-        registers[name] = make_register(name)
+        registers[name] = Register()
         return "register allocated"
 
     def lookup_register(name):
         return registers[name]
 
     def execute():
-        insts = get_contents(pc)
+        insts = pc.get_contents()
         if insts == []:
             return "done"
         proc = instruction_execution_proc(insts[0])
@@ -40,7 +40,7 @@ def make_new_machine():
 
     def dispatch(message):
         if message == "start":
-            set_contents(pc, instructions)
+            pc.set_contents(instructions)
             return execute()
         elif message == "install-instruction-sequence":
 
@@ -76,11 +76,11 @@ def start(machine):
 
 
 def get_register_contents(machine, register_name):
-    return get_contents(get_register(machine, register_name))
+    return get_register(machine, register_name).get_contents()
 
 
 def set_register_contents(machine, register_name, value):
-    set_contents(get_register(machine, register_name), value)
+    get_register(machine, register_name).set_contents(value)
     return "done"
 
 
