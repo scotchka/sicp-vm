@@ -2,6 +2,17 @@ from src.register import make_register, get_contents, set_contents
 from src.stack import make_stack
 
 
+def make_machine(register_names, ops, controller_text):
+    from src.assembler import assemble
+
+    machine = make_new_machine()
+    for register_name in register_names:
+        machine("allocate-register")(register_name)
+    machine("install-operations")(ops)
+    machine("install-instruction-sequence")(assemble(controller_text, machine))
+    return machine
+
+
 def make_new_machine():
     pc = make_register("pc")
     flag = make_register("flag")
