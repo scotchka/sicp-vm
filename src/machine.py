@@ -3,24 +3,19 @@ from src.stack import Stack
 from src.assembler import assemble
 
 
-def make_machine(register_names, ops, controller_text):
-
-    machine = Machine()
-    for register_name in register_names:
-        machine("allocate-register")(register_name)
-    machine("install-operations")(ops)
-    machine("install-instruction-sequence")(assemble(controller_text, machine))
-    return machine
-
-
 class Machine:
-    def __init__(self):
+    def __init__(self, register_names, ops, controller_text):
         self.pc = Register()
         self.flag = Register()
         self.stack = Stack()
         self.instructions = []
         self.ops = {"initialize-stack": lambda: self.stack.__init__()}
         self.registers = {"pc": self.pc, "flag": self.flag}
+
+        for register_name in register_names:
+            self.allocate_register(register_name)
+        self.install_operations(ops)
+        self.install_instructions(assemble(controller_text, self))
 
     def allocate_register(self, name):
         if name in self.registers:
