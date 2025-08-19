@@ -23,14 +23,11 @@ class Machine:
         self.registers[name] = Register()
         return "register allocated"
 
-    def lookup_register(self, name):
-        return self.registers[name]
-
     def execute(self):
         insts = self.pc.get_contents()
         if insts == []:
             return "done"
-        proc = instruction_execution_proc(insts[0])
+        text, proc = insts[0]
         proc()
         return self.execute()
 
@@ -43,21 +40,3 @@ class Machine:
 
     def install_operations(self, ops):
         self.ops.update(ops)
-
-
-def get_register_contents(machine, register_name):
-    return get_register(machine, register_name).get_contents()
-
-
-def set_register_contents(machine, register_name, value):
-    get_register(machine, register_name).set_contents(value)
-    return "done"
-
-
-def get_register(machine, register_name):
-    return machine("get-register")(register_name)
-
-
-def instruction_execution_proc(inst):
-    text, proc = inst
-    return proc
