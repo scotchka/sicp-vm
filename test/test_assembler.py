@@ -6,7 +6,7 @@ def test_assign_const():
 
     machine.start()
 
-    assert machine.registers == {"a": 5, "pc": 1, "flag": None}
+    assert machine.registers == {"a": 5, "pc": 1, "flag": 0}
 
 
 def test_assign_label():
@@ -14,16 +14,24 @@ def test_assign_label():
 
     machine.start()
 
-    assert machine.registers == {"a": 0, "pc": 1, "flag": None}
+    assert machine.registers == {"a": 0, "pc": 1, "flag": 0}
 
 
 def test_assign_register():
-    machine = Machine(["a", "b"], {}, ["start", ["assign", "a", ["reg", "b"]], "done"])
+    machine = Machine(
+        ["a", "b"],
+        {},
+        [
+            "start",
+            ["assign", "b", ["const", 10]],
+            ["assign", "a", ["reg", "b"]],
+            "done",
+        ],
+    )
 
-    machine.registers["b"] = 10
     machine.start()
 
-    assert machine.registers == {"a": 10, "b": 10, "pc": 1, "flag": None}
+    assert machine.registers == {"a": 10, "b": 10, "pc": 2, "flag": 0}
 
 
 def test_assign_op():
@@ -35,7 +43,7 @@ def test_assign_op():
 
     machine.start()
 
-    assert machine.registers == {"a": 7, "pc": 1, "flag": None}
+    assert machine.registers == {"a": 7, "pc": 1, "flag": 0}
 
 
 def test_make_test():
@@ -48,3 +56,39 @@ def test_make_test():
     machine.start()
 
     assert machine.registers == {"pc": 1, "flag": 1}
+
+
+def test_make_branch_true():
+    machine = Machine(
+        [],
+        {},
+        [
+            "start",
+            ["assign", "flag", ["const", 1]],
+            ["branch", ["label", "done"]],
+            ["assign", "flag", ["const", 0]],  # this line should be skipped
+            "done",
+        ],
+    )
+
+    machine.start()
+
+    assert machine.registers == {"pc": 3, "flag": 1}
+
+
+def test_make_branch_false():
+    machine = Machine(
+        [],
+        {},
+        [
+            "start",
+            ["assign", "flag", ["const", 0]],
+            ["branch", ["label", "done"]],
+            ["assign", "flag", ["const", 1]],  # this line should be executed
+            "done",
+        ],
+    )
+
+    machine.start()
+
+    assert machine.registers == {"pc": 3, "flag": 1}

@@ -29,6 +29,8 @@ def make_execution_procedure(inst, labels, machine, stack, ops):
         return make_assign(inst, machine, labels, ops)
     if inst[0] == "test":
         return make_test(inst, machine, labels, ops)
+    if inst[0] == "branch":
+        return make_branch(inst, machine, labels)
 
     raise Exception(f"unknown instruction type -- ASSEMBLE {inst}")  # pragma: no cover
 
@@ -77,5 +79,18 @@ def make_test(inst, machine, labels, ops):
     def proc():
         machine.registers["flag"] = condition_proc()
         machine.registers["pc"] += 1
+
+    return proc
+
+
+def make_branch(inst, machine, labels):
+    _, label = inst[1]  # ["label", "done"]
+    idx = labels[label]
+
+    def proc():
+        if machine.registers["flag"]:
+            machine.registers["pc"] = idx
+        else:
+            machine.registers["pc"] += 1
 
     return proc

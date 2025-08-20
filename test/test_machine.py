@@ -13,7 +13,7 @@ def test_allocate_register():
     machine = Machine([], {}, [])
     machine.allocate_register("abc")
     value = machine.registers["abc"]
-    assert value is None
+    assert value == 0
 
 
 def test_allocate_register_exception():

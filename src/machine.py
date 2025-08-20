@@ -7,7 +7,7 @@ class Machine:
         self.stack = Stack()
         self.instructions = []
         self.ops = {"initialize-stack": self.stack.__init__}
-        self.registers = {"pc": 0, "flag": None}
+        self.registers = {"pc": 0, "flag": 0}
 
         for register_name in register_names:
             self.allocate_register(register_name)
@@ -17,7 +17,7 @@ class Machine:
     def allocate_register(self, name):
         if name in self.registers:
             raise ValueError(f"Multiply defined register: {name}")
-        self.registers[name] = None
+        self.registers[name] = 0
         return "register allocated"
 
     def execute(self):
