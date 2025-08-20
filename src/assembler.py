@@ -27,6 +27,8 @@ def update_insts(insts, labels, machine):
 def make_execution_procedure(inst, labels, machine, stack, ops):
     if inst[0] == "assign":
         return make_assign(inst, machine, labels, ops)
+    if inst[0] == "test":
+        return make_test(inst, machine, labels, ops)
 
     raise Exception(f"unknown instruction type -- ASSEMBLE {inst}")  # pragma: no cover
 
@@ -66,3 +68,14 @@ def make_operation_exp(exp, machine, labels, operations):
     operands = exp[1:]
     aprocs = [make_primitive_exp(operand, machine, labels) for operand in operands]
     return lambda: op(*[proc() for proc in aprocs])
+
+
+def make_test(inst, machine, labels, ops):
+    condition = inst[1:]  # [["op", "="], ...
+    condition_proc = make_operation_exp(condition, machine, labels, ops)
+
+    def proc():
+        machine.registers["flag"] = condition_proc()
+        machine.registers["pc"] += 1
+
+    return proc

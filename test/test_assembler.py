@@ -36,3 +36,15 @@ def test_assign_op():
     machine.start()
 
     assert machine.registers == {"a": 7, "pc": 1, "flag": None}
+
+
+def test_make_test():
+    machine = Machine(
+        [],
+        {"=": lambda a, b: int(a == b)},
+        ["start", ["test", ["op", "="], ["const", 4], ["const", 4]], "done"],
+    )
+
+    machine.start()
+
+    assert machine.registers == {"pc": 1, "flag": 1}
