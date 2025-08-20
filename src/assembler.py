@@ -51,10 +51,10 @@ def make_primitive_exp(exp, machine, labels):
     keyword, value = exp
     if keyword == "const":  # ["const", 0]
         return lambda: value
-    elif keyword == "label":  # ["label", "loop"]
+    if keyword == "label":  # ["label", "loop"]
         idx = labels[value]
         return lambda: idx
-    elif keyword == "reg":  # ["reg", "n"]
+    if keyword == "reg":  # ["reg", "n"]
         return lambda: machine.registers[value]
 
     raise Exception(f"unknown expression type -- ASSEMBLE {exp}")  # pragma: no cover

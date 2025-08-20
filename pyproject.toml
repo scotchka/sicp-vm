@@ -11,7 +11,8 @@ dependencies = [
     "coverage (>=7.10.1,<8.0.0)",
     "pytest (>=8.4.1,<9.0.0)",
     "black (>=25.1.0,<26.0.0)",
-    "notebook (>=7.4.5,<8.0.0)"
+    "notebook (>=7.4.5,<8.0.0)",
+    "pylint (>=3.3.8,<4.0.0)"
 ]
 
 
@@ -29,4 +30,12 @@ shell = """
 coverage run -m pytest
 coverage report
 coverage html
+"""
+
+[tool.pylint.'MESSAGES CONTROL']
+disable = """
+    C0116,
+    C0114,
+    W0719,
+    C0115
 """

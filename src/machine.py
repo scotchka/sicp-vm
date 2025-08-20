@@ -6,7 +6,7 @@ class Machine:
     def __init__(self, register_names, ops, controller_text):
         self.stack = Stack()
         self.instructions = []
-        self.ops = {"initialize-stack": lambda: self.stack.__init__()}
+        self.ops = {"initialize-stack": self.stack.__init__}
         self.registers = {"pc": 0, "flag": None}
 
         for register_name in register_names:
