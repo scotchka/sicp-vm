@@ -31,6 +31,8 @@ def make_execution_procedure(inst, labels, machine, stack, ops):
         return make_test(inst, machine, labels, ops)
     if inst[0] == "branch":
         return make_branch(inst, machine, labels)
+    if inst[0] == "goto":
+        return make_goto(inst, machine, labels)
 
     raise Exception(f"unknown instruction type -- ASSEMBLE {inst}")  # pragma: no cover
 
@@ -94,3 +96,24 @@ def make_branch(inst, machine, labels):
             machine.registers["pc"] += 1
 
     return proc
+
+
+def make_goto(inst, machine, labels):
+    dest = inst[1]
+
+    if dest[0] == "label":  # ["goto", ["label", "test-b"]]
+        label = dest[1]
+        idx = labels[label]
+
+        def proc():
+            machine.registers["pc"] = idx
+
+        return proc
+
+    if dest[0] == "reg":  # ["goto, ["reg", "continue"]]
+        register_name = dest[1]
+
+        def proc():
+            machine.registers["pc"] = machine.registers[register_name]
+
+        return proc

@@ -92,3 +92,38 @@ def test_make_branch_false():
     machine.start()
 
     assert machine.registers == {"pc": 3, "flag": 1}
+
+
+def test_goto_label():
+    machine = Machine(
+        [],
+        {},
+        [
+            "start",
+            ["goto", ["label", "done"]],
+            ["assign", "flag", ["const", 99]],  # this line should be skipped
+            "done",
+        ],
+    )
+
+    machine.start()
+
+    assert machine.registers == {"pc": 2, "flag": 0}
+
+
+def test_goto_register():
+    machine = Machine(
+        [],
+        {},
+        [
+            "start",
+            ["assign", "flag", ["label", "done"]],
+            ["goto", ["reg", "flag"]],
+            ["assign", "flag", ["const", 99]],  # this line should be skipped
+            "done",
+        ],
+    )
+
+    machine.start()
+
+    assert machine.registers == {"pc": 3, "flag": 3}
