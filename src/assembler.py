@@ -17,32 +17,33 @@ def extract_labels(text):
 
 def update_insts(insts, labels, machine):
 
-    stack = machine.stack
-    ops = machine.ops
-
     for inst in insts:
-        inst[1] = make_execution_procedure(inst[0], labels, machine, stack, ops)
+        inst[1] = make_execution_procedure(inst[0], labels, machine)
 
 
-def make_execution_procedure(inst, labels, machine, stack, ops):
+def make_execution_procedure(inst, labels, machine):
     if inst[0] == "assign":
-        return make_assign(inst, machine, labels, ops)
+        return make_assign(inst, machine, labels)
     if inst[0] == "test":
-        return make_test(inst, machine, labels, ops)
+        return make_test(inst, machine, labels)
     if inst[0] == "branch":
         return make_branch(inst, machine, labels)
     if inst[0] == "goto":
         return make_goto(inst, machine, labels)
+    if inst[0] == "save":
+        return make_save(inst, machine)
+    if inst[0] == "restore":
+        return make_restore(inst, machine)
 
     raise Exception(f"unknown instruction type -- ASSEMBLE {inst}")  # pragma: no cover
 
 
-def make_assign(inst, machine, labels, operations):
+def make_assign(inst, machine, labels):
     # e.g. ["assign", "t", ...]
     reg_name = inst[1]
     value_exp = inst[2:]
     if value_exp[0][0] == "op":
-        value_proc = make_operation_exp(value_exp, machine, labels, operations)
+        value_proc = make_operation_exp(value_exp, machine, labels)
     else:
         value_proc = make_primitive_exp(value_exp[0], machine, labels)
 
@@ -66,17 +67,17 @@ def make_primitive_exp(exp, machine, labels):
     raise Exception(f"unknown expression type -- ASSEMBLE {exp}")  # pragma: no cover
 
 
-def make_operation_exp(exp, machine, labels, operations):
+def make_operation_exp(exp, machine, labels):
     _, op_name = exp[0]
-    op = operations[op_name]
+    op = machine.ops[op_name]
     operands = exp[1:]
     aprocs = [make_primitive_exp(operand, machine, labels) for operand in operands]
     return lambda: op(*[proc() for proc in aprocs])
 
 
-def make_test(inst, machine, labels, ops):
+def make_test(inst, machine, labels):
     condition = inst[1:]  # [["op", "="], ...
-    condition_proc = make_operation_exp(condition, machine, labels, ops)
+    condition_proc = make_operation_exp(condition, machine, labels)
 
     def proc():
         machine.registers["flag"] = condition_proc()
@@ -117,3 +118,25 @@ def make_goto(inst, machine, labels):
             machine.registers["pc"] = machine.registers[register_name]
 
         return proc
+
+
+def make_save(inst, machine):
+    _, register_name = inst
+
+    def proc():
+        value = machine.registers[register_name]
+        machine.stack.push(value)
+        machine.registers["pc"] += 1
+
+    return proc
+
+
+def make_restore(inst, machine):
+    _, register_name = inst
+
+    def proc():
+        value = machine.stack.pop()
+        machine.registers[register_name] = value
+        machine.registers["pc"] += 1
+
+    return proc

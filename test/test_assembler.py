@@ -151,3 +151,45 @@ def test_gcd_machine():
     machine.start()
 
     assert machine.registers["a"] == 6
+
+
+def test_save():
+    machine = Machine(
+        [],
+        {},
+        [
+            "start",
+            ["assign", "flag", ["const", 1]],
+            ["save", "flag"],
+            ["assign", "flag", ["const", 2]],
+            ["save", "flag"],
+            "done",
+        ],
+    )
+
+    machine.start()
+
+    assert machine.registers == {"pc": 4, "flag": 2}
+    assert machine.stack._stack == [1, 2]
+
+
+def test_restore():
+    machine = Machine(
+        [],
+        {},
+        [
+            "start",
+            ["assign", "flag", ["const", 1]],
+            ["save", "flag"],
+            ["assign", "flag", ["const", 2]],
+            ["save", "flag"],
+            ["assign", "flag", ["const", 3]],
+            ["restore", "flag"],
+            "done",
+        ],
+    )
+
+    machine.start()
+
+    assert machine.registers == {"pc": 6, "flag": 2}
+    assert machine.stack._stack == [1]

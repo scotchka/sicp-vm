@@ -24,7 +24,7 @@ class Machine:
         idx = self.registers["pc"]
         if idx == len(self.instructions):
             return "done"
-        text, proc = self.instructions[idx]
+        _, proc = self.instructions[idx]
         proc()
         return self.execute()
 
