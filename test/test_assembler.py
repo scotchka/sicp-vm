@@ -1,4 +1,3 @@
-from src import machine
 from src.machine import Machine
 
 
@@ -25,3 +24,15 @@ def test_assign_register():
     machine.start()
 
     assert machine.registers == {"a": 10, "b": 10, "pc": 1, "flag": None}
+
+
+def test_assign_op():
+    machine = Machine(
+        ["a"],
+        {"+": int.__add__},
+        ["start", ["assign", "a", ["op", "+"], ["const", 3], ["const", 4]], "done"],
+    )
+
+    machine.start()
+
+    assert machine.registers == {"a": 7, "pc": 1, "flag": None}

@@ -27,8 +27,8 @@ def update_insts(insts, labels, machine):
 def make_execution_procedure(inst, labels, machine, stack, ops):
     if inst[0] == "assign":
         return make_assign(inst, machine, labels, ops)
-    else:
-        raise Exception(f"unknown instruction type -- ASSEMBLE {inst}")
+
+    raise Exception(f"unknown instruction type -- ASSEMBLE {inst}")  # pragma: no cover
 
 
 def make_assign(inst, machine, labels, operations):
@@ -56,8 +56,8 @@ def make_primitive_exp(exp, machine, labels):
         return lambda: idx
     elif keyword == "reg":  # ["reg", "n"]
         return lambda: machine.registers[value]
-    else:
-        raise Exception(f"unknown expression type -- ASSEMBLE {exp}")
+
+    raise Exception(f"unknown expression type -- ASSEMBLE {exp}")  # pragma: no cover
 
 
 def make_operation_exp(exp, machine, labels, operations):
