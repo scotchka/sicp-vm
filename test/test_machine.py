@@ -12,8 +12,8 @@ def test_start():
 def test_allocate_register():
     machine = Machine([], {}, [])
     machine.allocate_register("abc")
-    register = machine.registers["abc"]
-    assert register.get_contents() is None
+    value = machine.registers["abc"]
+    assert value is None
 
 
 def test_allocate_register_exception():

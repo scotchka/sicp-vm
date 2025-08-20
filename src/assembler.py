@@ -11,69 +11,40 @@ def extract_labels(text):
         if isinstance(label_or_inst, str):
             labels[label_or_inst] = len(insts)
         else:
-            insts.append(label_or_inst)
+            insts.append([label_or_inst, None])
     return insts, labels
 
 
 def update_insts(insts, labels, machine):
-    pc = machine.registers["pc"]
-    flag = machine.registers["flag"]
+
     stack = machine.stack
     ops = machine.ops
 
-    def apply(inst):
-        set_instruction_execution_proc(
-            inst,
-            make_execution_procedure(
-                instruction_text(inst), labels, machine, pc, flag, stack, ops
-            ),
-        )
-
     for inst in insts:
-        apply(inst)
+        inst[1] = make_execution_procedure(inst[0], labels, machine, stack, ops)
 
 
-def make_instruction(text):
-    return [text, None]
-
-
-def instruction_text(inst):
-    text, proc = inst
-    return text
-
-
-def set_instruction_execution_proc(inst, proc):
-    inst[1] = proc
-
-
-def make_execution_procedure(inst, labels, machine, pc, flag, stack, ops):
+def make_execution_procedure(inst, labels, machine, stack, ops):
     if inst[0] == "assign":
-        return make_assign(inst, machine, labels, ops, pc)
+        return make_assign(inst, machine, labels, ops)
     else:
         raise Exception(f"unknown instruction type -- ASSEMBLE {inst}")
 
 
-def make_assign(inst, machine, labels, operations, pc):
-    target = machine.registers[assign_reg_name(inst)]
-    value_exp = assign_value_exp(inst)
+def make_assign(inst, machine, labels, operations):
+    # e.g. ["assign", "t", ...]
+    reg_name = inst[1]
+    value_exp = inst[2:]
     if value_exp[0][0] == "op":
         value_proc = make_operation_exp(value_exp, machine, labels, operations)
     else:
         value_proc = make_primitive_exp(value_exp[0], machine, labels)
 
     def proc():
-        target.set_contents(value_proc())
-        advance_pc(pc)
+        machine.registers[reg_name] = value_proc()
+        machine.registers["pc"] += 1
 
     return proc
-
-
-def assign_reg_name(assign_instruction):
-    return assign_instruction[1][0]
-
-
-def assign_value_exp(assign_instruction):
-    return assign_instruction[1][1:]
 
 
 def make_primitive_exp(exp, machine, labels):
@@ -84,8 +55,7 @@ def make_primitive_exp(exp, machine, labels):
         idx = labels[value]
         return lambda: idx
     elif keyword == "reg":  # ["reg", "n"]
-        r = machine.registers[value]
-        return lambda: r.get_contents()
+        return lambda: machine.registers[value]
     else:
         raise Exception(f"unknown expression type -- ASSEMBLE {exp}")
 
@@ -96,7 +66,3 @@ def make_operation_exp(exp, machine, labels, operations):
     operands = exp[1:]
     aprocs = [make_primitive_exp(operand, machine, labels) for operand in operands]
     return lambda: op(*[proc() for proc in aprocs])
-
-
-def advance_pc(pc):
-    pc.set_contents(pc.get_contents() + 1)
