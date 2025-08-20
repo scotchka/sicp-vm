@@ -127,3 +127,27 @@ def test_goto_register():
     machine.start()
 
     assert machine.registers == {"pc": 3, "flag": 3}
+
+
+def test_gcd_machine():
+    machine = Machine(
+        ["a", "b", "t"],
+        {"rem": lambda a, b: a % b, "=": lambda a, b: int(a == b)},
+        [
+            "test-b",
+            ["test", ["op", "="], ["reg", "b"], ["const", 0]],
+            ["branch", ["label", "gcd-done"]],
+            ["assign", "t", ["op", "rem"], ["reg", "a"], ["reg", "b"]],
+            ["assign", "a", ["reg", "b"]],
+            ["assign", "b", ["reg", "t"]],
+            ["goto", ["label", "test-b"]],
+            "gcd-done",
+        ],
+    )
+
+    machine.registers["a"] = 12
+    machine.registers["b"] = 18
+
+    machine.start()
+
+    assert machine.registers["a"] == 6
