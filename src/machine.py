@@ -5,20 +5,17 @@ from src.assembler import assemble
 class Machine:
     def __init__(self, register_names, ops, controller_text):
         self.stack = Stack()
-        self.instructions = []
-        self.ops = {"initialize-stack": self.stack.__init__}
+        self.ops = ops
         self.registers = {"pc": 0, "flag": 0}
 
         for register_name in register_names:
-            self.allocate_register(register_name)
-        self.install_operations(ops)
-        self.install_instructions(assemble(controller_text, self))
+            if register_name in self.registers:
+                raise ValueError(
+                    f"Multiply defined register: {register_name}"
+                )  # pragma: no cover
+            self.registers[register_name] = 0
 
-    def allocate_register(self, name):
-        if name in self.registers:
-            raise ValueError(f"Multiply defined register: {name}")  # pragma: no cover
-        self.registers[name] = 0
-        return "register allocated"
+        self.instructions = assemble(controller_text, self)
 
     def execute(self):
         idx = self.registers["pc"]
@@ -31,9 +28,3 @@ class Machine:
     def start(self):
         self.registers["pc"] = 0
         return self.execute()
-
-    def install_instructions(self, instructions):
-        self.instructions = instructions
-
-    def install_operations(self, ops):
-        self.ops.update(ops)
