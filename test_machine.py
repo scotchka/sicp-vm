@@ -129,10 +129,6 @@ def test_goto_register():
     assert machine.registers == {"pc": 3, "flag": 3}
 
 
-def read():
-    return int(input("enter an integer: "))
-
-
 def test_gcd_machine(mocker):
     print_mock = mocker.patch("builtins.print")
     mocker.patch("builtins.input", side_effect=["18", "12"])
@@ -142,7 +138,7 @@ def test_gcd_machine(mocker):
             "rem": lambda a, b: a % b,
             "=": lambda a, b: int(a == b),
             "print": print,
-            "read": read,
+            "read": lambda: int(input("enter an integer: ")),
         },
         [
             "gcd-loop",
@@ -236,3 +232,48 @@ def test_factorial():
     machine.registers["n"] = 6
     machine.start()
     assert machine.registers["val"] == 6 * 5 * 4 * 3 * 2 * 1
+
+
+def test_fibonacci():
+    machine = Machine(
+        ["n", "val", "continue"],
+        {
+            "<": int.__lt__,
+            "-": int.__sub__,
+            "+": int.__add__,
+        },
+        [
+            "controller",
+            ["assign", "continue", ["label", "fib-done"]],
+            "fib-loop",
+            ["test", ["op", "<"], ["reg", "n"], ["const", 2]],
+            ["branch", ["label", "immediate-answer"]],
+            ["save", "continue"],
+            ["assign", "continue", ["label", "afterfib-n-1"]],
+            ["save", "n"],
+            ["assign", "n", ["op", "-"], ["reg", "n"], ["const", 1]],
+            ["goto", ["label", "fib-loop"]],
+            "afterfib-n-1",
+            ["restore", "n"],
+            ["restore", "continue"],
+            ["assign", "n", ["op", "-"], ["reg", "n"], ["const", 2]],
+            ["save", "continue"],
+            ["assign", "continue", ["label", "afterfib-n-2"]],
+            ["save", "val"],
+            ["goto", ["label", "fib-loop"]],
+            "afterfib-n-2",
+            ["assign", "n", ["reg", "val"]],
+            ["restore", "val"],
+            ["restore", "continue"],
+            ["assign", "val", ["op", "+"], ["reg", "val"], ["reg", "n"]],
+            ["goto", ["reg", "continue"]],
+            "immediate-answer",
+            ["assign", "val", ["reg", "n"]],
+            ["goto", ["reg", "continue"]],
+            "fib-done",
+        ],
+    )
+    for n, expected in zip(range(1, 9), [1, 1, 2, 3, 5, 8, 13, 21]):
+        machine.registers["n"] = n
+        machine.start()
+        assert machine.registers["val"] == expected
