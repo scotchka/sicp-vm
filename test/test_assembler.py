@@ -129,11 +129,25 @@ def test_goto_register():
     assert machine.registers == {"pc": 3, "flag": 3}
 
 
-def test_gcd_machine():
+def read():
+    return int(input("enter an integer: "))
+
+
+def test_gcd_machine(mocker):
+    print_mock = mocker.patch("builtins.print")
+    mocker.patch("builtins.input", side_effect=["18", "12"])
     machine = Machine(
         ["a", "b", "t"],
-        {"rem": lambda a, b: a % b, "=": lambda a, b: int(a == b)},
+        {
+            "rem": lambda a, b: a % b,
+            "=": lambda a, b: int(a == b),
+            "print": print,
+            "read": read,
+        },
         [
+            "gcd-loop",
+            ["assign", "a", ["op", "read"]],
+            ["assign", "b", ["op", "read"]],
             "test-b",
             ["test", ["op", "="], ["reg", "b"], ["const", 0]],
             ["branch", ["label", "gcd-done"]],
@@ -142,15 +156,13 @@ def test_gcd_machine():
             ["assign", "b", ["reg", "t"]],
             ["goto", ["label", "test-b"]],
             "gcd-done",
+            ["perform", ["op", "print"], ["reg", "a"]],
         ],
     )
 
-    machine.registers["a"] = 12
-    machine.registers["b"] = 18
-
     machine.start()
 
-    assert machine.registers["a"] == 6
+    print_mock.assert_called_once_with(6)
 
 
 def test_save():

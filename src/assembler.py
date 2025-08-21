@@ -34,6 +34,8 @@ def make_execution_procedure(inst, labels, machine):
         return make_save(inst, machine)
     if inst[0] == "restore":
         return make_restore(inst, machine)
+    if inst[0] == "perform":
+        return make_perform(inst, machine, labels)
 
     raise Exception(f"unknown instruction type -- ASSEMBLE {inst}")  # pragma: no cover
 
@@ -137,6 +139,17 @@ def make_restore(inst, machine):
     def proc():
         value = machine.stack.pop()
         machine.registers[register_name] = value
+        machine.registers["pc"] += 1
+
+    return proc
+
+
+def make_perform(inst, machine, labels):
+    action = inst[1:]  # [["op", "print"], ...]
+    action_proc = make_operation_exp(action, machine, labels)
+
+    def proc():
+        action_proc()
         machine.registers["pc"] += 1
 
     return proc
