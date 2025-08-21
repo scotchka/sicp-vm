@@ -7,7 +7,7 @@ The most significant deviation from the original Scheme is the use of arrays (Py
 of linked lists. This has as a consequence, for example, that the program counter is an index in the
 instructions list rather than a reference to a link.
 
-## Example: greatest common divisor (p. 514)
+## Example: greatest common divisor
 
 ```python
 from src.machine import Machine
@@ -34,4 +34,40 @@ machine.registers["b"] = 18
 machine.start()
 
 assert machine.registers["a"] == 6
+```
+
+## Example: factorial
+
+```python
+machine = Machine(
+    ["continue", "n", "val"],
+    {"=": lambda a, b: int(a == b), "-": int.__sub__, "*": int.__mul__},
+    [
+        "controller",
+        ["assign", "continue", ["label", "fact-done"]],
+        "fact-loop",
+        ["test", ["op", "="], ["reg", "n"], ["const", 1]],
+        ["branch", ["label", "base-case"]],
+        ["save", "continue"],
+        ["save", "n"],
+        ["assign", "n", ["op", "-"], ["reg", "n"], ["const", 1]],
+        ["assign", "continue", ["label", "after-fact"]],
+        ["goto", ["label", "fact-loop"]],
+        "after-fact",
+        ["restore", "n"],
+        ["restore", "continue"],
+        ["assign", "val", ["op", "*"], ["reg", "n"], ["reg", "val"]],
+        ["goto", ["reg", "continue"]],
+        "base-case",
+        ["assign", "val", ["const", 1]],
+        ["goto", ["reg", "continue"]],
+        "fact-done",
+    ],
+)
+
+machine.registers["n"] = 6
+
+machine.start()
+
+assert machine.registers["val"] == 6 * 5 * 4 * 3 * 2 * 1
 ```

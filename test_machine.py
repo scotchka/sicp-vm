@@ -205,3 +205,34 @@ def test_restore():
 
     assert machine.registers == {"pc": 6, "flag": 2}
     assert machine.stack._stack == [1]
+
+
+def test_factorial():
+    machine = Machine(
+        ["continue", "n", "val"],
+        {"=": lambda a, b: int(a == b), "-": int.__sub__, "*": int.__mul__},
+        [
+            "controller",
+            ["assign", "continue", ["label", "fact-done"]],
+            "fact-loop",
+            ["test", ["op", "="], ["reg", "n"], ["const", 1]],
+            ["branch", ["label", "base-case"]],
+            ["save", "continue"],
+            ["save", "n"],
+            ["assign", "n", ["op", "-"], ["reg", "n"], ["const", 1]],
+            ["assign", "continue", ["label", "after-fact"]],
+            ["goto", ["label", "fact-loop"]],
+            "after-fact",
+            ["restore", "n"],
+            ["restore", "continue"],
+            ["assign", "val", ["op", "*"], ["reg", "n"], ["reg", "val"]],
+            ["goto", ["reg", "continue"]],
+            "base-case",
+            ["assign", "val", ["const", 1]],
+            ["goto", ["reg", "continue"]],
+            "fact-done",
+        ],
+    )
+    machine.registers["n"] = 6
+    machine.start()
+    assert machine.registers["val"] == 6 * 5 * 4 * 3 * 2 * 1
