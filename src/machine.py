@@ -15,7 +15,9 @@ class Machine:
                 )  # pragma: no cover
             self.registers[register_name] = 0
 
-        self.instructions = assemble(controller_text, self)
+        self.instructions = assemble(
+            controller_text, self.registers, self.ops, self.stack
+        )
 
     def execute(self):
         idx = self.registers["pc"]
